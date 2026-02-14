@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Riwayat - SmartTailor</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI', sans-serif;
+}
+
+body{
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    padding:20px;
+    padding-bottom:120px;
+    min-height:100vh;
+    color:white;
+}
+
+h2{
+    text-align:center;
+    margin-bottom:25px;
+    font-weight:600;
+}
+
+.card{
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(15px);
+    border-radius:18px;
+    padding:20px;
+    margin-bottom:20px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.2);
+    position:relative;
+}
+
+.delete-checkbox{
+    position:absolute;
+    top:15px;
+    right:15px;
+}
+
+.delete-checkbox input{
+    transform:scale(1.2);
+}
+
+.section-title{
+    margin-bottom:10px;
+    font-weight:600;
+    font-size:15px;
+}
+
+.img-input{
+    width:100%;
+    max-width:220px;
+    border-radius:12px;
+    margin:10px auto;
+    display:block;
+}
+
+.results-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+    margin-top:10px;
+}
+
+.result-item{
+    background:rgba(255,255,255,0.2);
+    border-radius:15px;
+    padding:8px;
+    text-align:center;
+    animation:fadeIn 0.4s ease;
+}
+
+.result-item img{
+    width:100%;
+    border-radius:10px;
+}
+
+.score-badge{
+    display:inline-block;
+    margin-top:6px;
+    background:white;
+    color:#764ba2;
+    padding:3px 8px;
+    border-radius:12px;
+    font-size:12px;
+    font-weight:bold;
+}
+
+hr{
+    border:none;
+    border-top:1px solid rgba(255,255,255,0.3);
+    margin:15px 0;
+}
+
+.empty-state{
+    text-align:center;
+    margin-top:60px;
+    opacity:0.9;
+}
+
+.empty-state a{
+    display:inline-block;
+    margin-top:15px;
+    padding:10px 20px;
+    background:white;
+    color:#764ba2;
+    border-radius:10px;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+.btn-delete{
+    position:fixed;
+    bottom:85px;
+    left:50%;
+    transform:translateX(-50%);
+    width:90%;
+    max-width:400px;
+    padding:14px;
+    background:#c1121f;
+    color:white;
+    border:none;
+    border-radius:15px;
+    font-weight:bold;
+    box-shadow:0 6px 20px rgba(0,0,0,0.3);
+}
+
+.bottom-nav{
+    position:fixed;
+    bottom:0;
+    left:0;
+    width:100%;
+    display:flex;
+    justify-content:space-around;
+    background:rgba(0,0,0,0.3);
+    padding:12px 0;
+    backdrop-filter:blur(10px);
+}
+
+.bottom-nav a{
+    color:white;
+    text-decoration:none;
+    font-size:14px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+
+.bottom-nav a.active{
+    font-weight:bold;
+}
+
+@keyframes fadeIn{
+    from{opacity:0; transform:translateY(10px);}
+    to{opacity:1; transform:translateY(0);}
+}
+</style>
+</head>
+<body>
+
+<h2>🕓 Riwayat Rekomendasi</h2>
+
+{% if history|length == 0 %}
+<div class="empty-state">
+    <p>📭 Belum ada riwayat rekomendasi</p>
+    <a href="/rekomendasi">Mulai Upload</a>
+</div>
+{% endif %}
+
+<form action="/hapus_riwayat" method="POST">
+
+{% for hid, h in history.items() %}
+<div class="card">
+
+    <label class="delete-checkbox">
+        <input type="checkbox" name="hapus_id[]" value="{{ hid }}">
+        <span style="font-size: 12px; font-weight: bold; color: #c1121f;">
+            Pilih
+        </span>
+    </label>
+    
+    <div class="section-title">📤 Gambar Input</div>
+    <img src="{{ url_for('static', filename=h.input_image.replace('static/','')) }}" class="img-input">
+
+    <div style="text-align:center; margin-top:8px;">
+        Kategori: <b>{{ h.category }}</b><br>
+        Bentuk Tubuh: <b>{{ h.tubuh|capitalize }}</b>
+    </div>
+
+    <hr>
+
+    <div class="section-title">✨ Hasil Rekomendasi</div>
+
+    <div class="results-grid">
+        {% for r in h.results %}
+        <div class="result-item">
+            <img src="{{ url_for('static', filename=r.image.replace('static/','')) }}">
+            <div class="score-badge">
+                {{ (r.score*100)|round(1) }}% Match
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endfor %}
+
+{% if history|length > 0 %}
+<button class="btn-delete">
+    🗑 Hapus Riwayat Terpilih
+</button>
+{% endif %}
+
+</form>
+
+<div class="bottom-nav">
+    <a href="/" class="{{ 'active' if request.path == '/' }}">🏠<span>Home</span></a>
+    <a href="/rekomendasi" class="{{ 'active' if request.path == '/rekomendasi' }}">⬆<span>Upload</span></a>
+    <a href="/riwayat" class="active">🕓<span>Riwayat</span></a>
+</div>
+
+</body>
+</html>

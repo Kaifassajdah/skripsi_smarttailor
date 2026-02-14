@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin - Users</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .header {
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .container {
+            padding: 15px;
+            padding-bottom: 80px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255,255,255,0.15);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        th {
+            background: rgba(0,0,0,0.4);
+        }
+
+        tr:nth-child(even) {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .search-box {
+            margin-bottom: 15px;
+        }
+
+        .search-box input {
+            padding: 6px;
+            border-radius: 15px;
+            border: none;
+        }
+
+        .search-box button {
+            padding: 6px 10px;
+            border-radius: 15px;
+            border: none;
+            background: white;
+        }
+
+        .back-btn {
+            position: fixed;
+            bottom: 15px;
+            left: 15px;
+            background: rgba(0,0,0,0.6);
+            padding: 10px 15px;
+            border-radius: 25px;
+            z-index: 1000;
+        }
+
+        .back-btn a {
+            color: white;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="header">
+    👥 Data Users
+</div>
+
+<div class="container">
+
+    <div class="search-box">
+        <form method="GET">
+            <input type="text" name="q" placeholder="Cari username..." value="{{ keyword }}">
+            <button type="submit">🔍</button>
+        </form>
+    </div>
+
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Last Login</th>
+        </tr>
+
+        {% for user in users %}
+        <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.last_login }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+</div>
+
+<div class="back-btn">
+    <a href="/admin">⬅ Dashboard</a>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Evaluasi Model - SmartTailor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.1"></script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .header {
+            padding: 20px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+            text-transform: uppercase;
+        }
+
+        .container {
+            padding: 15px;
+            padding-bottom: 100px;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.15);
+            padding: 18px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .metric-box {
+            background: rgba(255,255,255,0.2);
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        table th, table td {
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 6px;
+            text-align: center;
+        }
+
+        table th {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .btn-eval {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            background: white;
+            color: #764ba2;
+        }
+
+        .btn-back {
+            position: fixed;
+            bottom: 20px;
+            left: 15px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            padding: 8px 14px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+    🧠 Evaluasi Model CNN - SmartTailor
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div style="background:white; color:#764ba2; padding:10px; border-radius:8px; margin:10px;">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<div class="container">
+
+{% if metrics %}
+
+<!-- ================= DETAIL EVALUASI TERAKHIR ================= -->
+<div class="card">
+    <h4 style="text-align:center;">📋 Detail Evaluasi Terakhir</h4>
+
+    <div class="metric-grid">
+        <div class="metric-box">
+            <strong>Accuracy</strong><br>
+            {{ (metrics.accuracy * 100)|round(2) }}%
+        </div>
+        <div class="metric-box">
+            <strong>Precision</strong><br>
+            {{ (metrics.precision * 100)|round(2) }}%
+        </div>
+        <div class="metric-box">
+            <strong>Recall</strong><br>
+            {{ (metrics.recall * 100)|round(2) }}%
+        </div>
+        <div class="metric-box">
+            <strong>F1 Score</strong><br>
+            {{ (metrics.f1_score * 100)|round(2) }}%
+        </div>
+    </div>
+
+    <div style="margin-top:10px; font-size:12px;">
+        Evaluasi terakhir: {{ metrics.created_at }}
+    </div>
+</div>
+
+<!-- ================= CONFUSION MATRIX ================= -->
+{% if confusion_matrix %}
+<div class="card">
+    <h4 style="text-align:center;">📊 Confusion Matrix</h4>
+    <canvas id="cmChart"></canvas>
+</div>
+{% endif %}
+
+<!-- ================= CLASSIFICATION REPORT ================= -->
+{% if classification_report %}
+<div class="card">
+    <h4 style="text-align:center;">📈 Classification Report</h4>
+
+    <table>
+        <tr>
+            <th>Kelas</th>
+            <th>Precision</th>
+            <th>Recall</th>
+            <th>F1-Score</th>
+            <th>Support</th>
+        </tr>
+
+        {% for label, values in classification_report.items() if label not in ['accuracy','macro avg','weighted avg'] %}
+        <tr>
+            <td>{{ label }}</td>
+            <td>{{ values.precision|round(2) }}</td>
+            <td>{{ values.recall|round(2) }}</td>
+            <td>{{ values['f1-score']|round(2) }}</td>
+            <td>{{ values.support }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endif %}
+
+<!-- ================= RIWAYAT EVALUASI ================= -->
+{% if history_metrics %}
+<div class="card">
+    <h4 style="text-align:center;">🕒 Riwayat Evaluasi Model</h4>
+
+    <table>
+        <tr>
+            <th>Tanggal</th>
+            <th>Accuracy</th>
+            <th>F1 Score</th>
+        </tr>
+        {% for row in history_metrics %}
+        <tr>
+            <td>{{ row.created_at }}</td>
+            <td>{{ (row.accuracy * 100)|round(2) }}%</td>
+            <td>{{ (row.f1_score * 100)|round(2) }}%</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endif %}
+
+{% else %}
+<p>Belum ada data evaluasi model.</p>
+{% endif %}
+
+<!-- ================= TOMBOL JALANKAN EVALUASI ================= -->
+<div class="card">
+    <form action="/admin/run_evaluasi_model" method="post">
+        <button type="submit" class="btn-eval">
+            🔄 Jalankan Evaluasi Model
+        </button>
+    </form>
+</div>
+
+</div>
+
+<a href="/admin" class="btn-back">⬅ Dashboard</a>
+
+<!-- ================= SCRIPT CONFUSION MATRIX ================= -->
+{% if confusion_matrix %}
+<script>
+const cmData = {{ confusion_matrix | tojson }};
+const labels = ['Dress','Atasan','Bawahan'];
+
+const ctx = document.getElementById('cmChart').getContext('2d');
+
+const matrixData = [];
+for (let row = 0; row < cmData.length; row++) {
+    for (let col = 0; col < cmData[row].length; col++) {
+        matrixData.push({
+            x: col,
+            y: row,
+            v: cmData[row][col]
+        });
+    }
+}
+
+const maxValue = Math.max(...matrixData.map(d => d.v));
+
+new Chart(ctx, {
+    type: 'matrix',
+    data: {
+        datasets: [{
+            data: matrixData,
+            backgroundColor(context) {
+                const value = context.dataset.data[context.dataIndex].v;
+                const alpha = value / maxValue;
+                return `rgba(0, 70, 160, ${alpha})`;
+            },
+            borderWidth: 2,
+            borderColor: 'white',
+            width: ({chart}) => (chart.chartArea || {}).width / labels.length - 6,
+            height: ({chart}) => (chart.chartArea || {}).height / labels.length - 6
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            x: {
+                type: 'linear',
+                position: 'top',
+                min: -0.5,
+                max: labels.length - 0.5,
+                ticks: {
+                    stepSize: 1,
+                    color: 'white',
+                    callback: value => labels[value]
+                },
+                title: {
+                    display: true,
+                    text: 'Prediction',
+                    color: 'white'
+                }
+            },
+            y: {
+                type: 'linear',
+                min: -0.5,
+                max: labels.length - 0.5,
+                ticks: {
+                    stepSize: 1,
+                    color: 'white',
+                    callback: value => labels[value]
+                },
+                title: {
+                    display: true,
+                    text: 'Actual',
+                    color: 'white'
+                }
+            }
+        }
+    },
+    plugins: [{
+        id: 'centerTextPlugin',
+        afterDatasetsDraw(chart) {
+            const {ctx} = chart;
+            const meta = chart.getDatasetMeta(0);
+
+            meta.data.forEach((element, index) => {
+                const data = matrixData[index];
+
+                ctx.save();
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(data.v, element.x, element.y);
+                ctx.restore();
+            });
+        }
+    }]
+});
+</script>
+{% endif %}
+
+
+</body>
+</html>

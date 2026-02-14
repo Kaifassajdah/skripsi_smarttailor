@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Upload - SmartTailor</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI', sans-serif;
+}
+
+body{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg, #667eea, #764ba2);
+    padding:20px;
+    color:white;
+}
+
+.container{
+    width:100%;
+    max-width:380px;
+}
+
+.card{
+    background:rgba(255,255,255,0.15);
+    backdrop-filter:blur(15px);
+    border-radius:18px;
+    padding:25px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.2);
+    text-align:center;
+}
+
+h2{
+    margin-bottom:20px;
+    font-weight:600;
+}
+
+.upload-box{
+    border:2px dashed rgba(255,255,255,0.6);
+    border-radius:15px;
+    padding:25px;
+    cursor:pointer;
+    transition:0.3s;
+    margin-bottom:20px;
+}
+
+.upload-box:hover{
+    background:rgba(255,255,255,0.1);
+}
+
+input[type="file"]{
+    display:none;
+}
+
+#preview{
+    width:100%;
+    border-radius:12px;
+    margin-bottom:15px;
+    display:none;
+}
+
+.btn{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:12px;
+    font-weight:bold;
+    font-size:16px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.btn-primary{
+    background:white;
+    color:#764ba2;
+}
+
+.btn-primary:hover{
+    transform:translateY(-2px);
+}
+
+.loading{
+    margin-top:15px;
+    font-weight:bold;
+}
+
+.back{
+    margin-top:15px;
+    display:inline-block;
+    font-size:14px;
+    color:white;
+    text-decoration:none;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+<div class="card">
+
+<h2>📤 Upload Busana</h2>
+
+<form action="/rekomendasi" method="POST" enctype="multipart/form-data" onsubmit="showLoading()">
+
+<label class="upload-box">
+    📷 Tap untuk Pilih Foto
+    <input type="file" name="image" accept="image/*" onchange="previewImage(event)" required>
+</label>
+
+<img id="preview">
+
+<button type="submit" class="btn btn-primary" id="btnSubmit">
+    Proses Rekomendasi ✨
+</button>
+
+</form>
+
+<p id="loading" class="loading" style="display:none">
+⏳ Sedang Menganalisis...
+</p>
+
+<a href="/" class="back">⬅ Kembali ke Dashboard</a>
+
+</div>
+</div>
+
+<script>
+function previewImage(event){
+    const preview = document.getElementById('preview');
+    const file = event.target.files[0];
+
+    if(file){
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = 'block';
+    }
+}
+
+function showLoading(){
+    document.getElementById("loading").style.display = "block";
+    document.getElementById("btnSubmit").disabled = true;
+    document.getElementById("btnSubmit").innerText = "Memproses...";
+}
+</script>
+
+</body>
+</html>

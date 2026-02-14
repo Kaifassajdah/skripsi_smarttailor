@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SmartTailor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<h2>SmartTailor - Rekomendasi Busana</h2>
+
+<form method="POST" enctype="multipart/form-data">
+    <input type="file" name="image" required>
+    <button type="submit">Proses</button>
+</form>
+
+{% if uploaded_image %}
+    <h3>Gambar Upload</h3>
+    <img src="{{ url_for('static', filename=uploaded_image.replace('static/','')) }}" width="200" style="border: 2px solid #eee; border-radius: 10px;">
+{% endif %}
+
+{% if results %}
+    <h3>Hasil Klasifikasi</h3>
+    <p>Kategori: {{ category }}</p>
+    <p>Confidence: {{ confidence }}</p>
+
+    <h3>Rekomendasi</h3>
+    {% for r in results %}
+        <div style="display:inline-block; margin:10px;">
+            <img src="{{ url_for('static', filename=r.image.replace('static/','')) }}" width="150" style="border-radius: 8px;"><br>
+            Score: {{ r.score }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+</body>
+</html>

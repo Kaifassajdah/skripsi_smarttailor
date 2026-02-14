@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard - SmartTailor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.1"></script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .header {
+            padding: 18px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .container {
+            padding: 15px;
+            padding-bottom: 120px;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.15);
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .card h3 {
+            font-size: 12px;
+            margin: 0;
+            opacity: 0.8;
+            text-transform: uppercase;
+        }
+
+        .card p {
+            font-size: 16px;
+            margin: 8px 0 0;
+            font-weight: bold;
+        }
+
+        .chart-box {
+            background: rgba(255,255,255,0.15);
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 20px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .chart-box h3 {
+            text-align: center;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .navbar {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-item {
+            text-align: center;
+            color: white;
+            text-decoration: none;
+            font-size: 11px;
+            opacity: 0.7;
+            transition: 0.3s;
+        }
+
+        .nav-item:hover {
+            opacity: 1;
+        }
+
+        .nav-item div {
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    📊 Dashboard SmartTailor
+</div>
+
+<div class="metrics">
+
+    <div class="card">
+        <h3>Accuracy</h3>
+        <p>{{ (system_metrics.accuracy * 100)|round(2) if system_metrics else 0 }}%</p>
+    </div>
+
+    <div class="card">
+        <h3>Precision</h3>
+        <p>{{ (system_metrics.precision * 100)|round(2) if system_metrics else 0 }}%</p>
+    </div>
+
+    <div class="card">
+        <h3>Recall</h3>
+        <p>{{ (system_metrics.recall * 100)|round(2) if system_metrics else 0 }}%</p>
+    </div>
+
+    <div class="card">
+        <h3>F1 Score</h3>
+        <p>{{ (system_metrics.f1_score * 100)|round(2) if system_metrics else 0 }}%</p>
+    </div>
+
+    <!-- HUMAN EVALUATION -->
+    <div class="card">
+        <h3>Kesesuaian (Human)</h3>
+        <p>{{ avg_kesesuaian if avg_kesesuaian else 0 }}/5</p>
+    </div>
+
+    <div class="card">
+        <h3>Estetika (Human)</h3>
+        <p>{{ avg_estetika if avg_estetika else 0 }}/5</p>
+    </div>
+
+</div>
+
+    <div class="chart-box">
+        <h3>📊 Perbandingan Sistem vs Admin/Penjahit</h3>
+        <canvas id="compareChart"></canvas>
+    </div>
+
+    <div class="chart-box">
+        <h3>📊 Confusion Matrix (Sistem)</h3>
+        <canvas id="cmChart"></canvas>
+    </div>
+
+</div>
+
+<div class="navbar">
+    <a href="/admin/users" class="nav-item">
+        <div>👥</div>
+        Users
+    </a>
+    <a href="/admin/riwayat" class="nav-item">
+        <div>🕓</div>
+        Riwayat
+    </a>
+    <a href="/admin/evaluasi_model" class="nav-item">
+        <div>🧠</div>
+        Evaluasi
+    </a>
+    <a href="/logout" class="nav-item">
+        <div>🚪</div>
+        Logout
+    </a>
+</div>
+
+<script>
+/* ================= 1. GRAFIK PERBANDINGAN METRIK ================= */
+const compareCtx = document.getElementById('compareChart').getContext('2d');
+new Chart(compareCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Accuracy', 'Precision', 'Recall', 'F1'],
+        datasets: [
+            {
+                label: 'Sistem',
+                data: [
+                    {{ (system_metrics.accuracy * 100)|round(2) if system_metrics else 0 }},
+                    {{ (system_metrics.precision * 100)|round(2) if system_metrics else 0 }},
+                    {{ (system_metrics.recall * 100)|round(2) if system_metrics else 0 }},
+                    {{ (system_metrics.f1_score * 100)|round(2) if system_metrics else 0 }}
+                ],
+                backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            },
+            {
+                label: 'Admin',
+                data: [
+                    {{ (expert_metrics.accuracy * 100)|round(2) if expert_metrics else 0 }},
+                    {{ (expert_metrics.precision * 100)|round(2) if expert_metrics else 0 }},
+                    {{ (expert_metrics.recall * 100)|round(2) if expert_metrics else 0 }},
+                    {{ (expert_metrics.f1_score * 100)|round(2) if expert_metrics else 0 }}
+                ],
+                backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { labels: { color: 'white' } }
+        },
+        scales: {
+            x: { ticks: { color: 'white' } },
+            y: { 
+                ticks: { color: 'white' },
+                beginAtZero: true, 
+                max: 100 
+            }
+        }
+    }
+});
+/* ================= 2. GRAFIK CONFUSION MATRIX (FINAL STYLE MATCH) ================= */
+{% if confusion_matrix %}
+document.addEventListener("DOMContentLoaded", function() {
+
+    const cmData = {{ confusion_matrix | tojson }};
+    const cmCtx = document.getElementById('cmChart');
+    if (!cmCtx) return;
+
+    // Label dengan penjelasan agar lebih jelas
+    const labels = [
+        'Dress',
+        'Atasan',
+        'Bawahan'
+    ];
+
+    // Convert matrix 2D ke format heatmap
+    const matrixData = [];
+    for (let row = 0; row < cmData.length; row++) {
+        for (let col = 0; col < cmData[row].length; col++) {
+            matrixData.push({
+                x: col,
+                y: row,
+                v: cmData[row][col]
+            });
+        }
+    }
+
+    // Cari nilai maksimum untuk gradasi warna
+    const maxValue = Math.max(...matrixData.map(d => d.v));
+
+    new Chart(cmCtx, {
+        type: 'matrix',
+        data: {
+            datasets: [{
+                label: 'Confusion Matrix',
+                data: matrixData,
+
+                backgroundColor(context) {
+                    const value = context.dataset.data[context.dataIndex].v;
+                    const alpha = value / maxValue;
+                    return `rgba(0, 70, 160, ${alpha})`; // biru elegan
+                },
+
+                borderColor: 'white',
+                borderWidth: 2,
+
+                width: ({chart}) =>
+                    chart.chartArea ? chart.chartArea.width / labels.length - 6 : 0,
+
+                height: ({chart}) =>
+                    chart.chartArea ? chart.chartArea.height / labels.length - 6 : 0
+            }]
+        },
+
+        options: {
+            responsive: true,
+            layout: {
+                padding: 10
+            },
+            plugins: {
+                legend: { display: false },
+
+                tooltip: {
+                    callbacks: {
+                        label: (context) =>
+                            `Actual: ${labels[context.raw.y]} | ` +
+                            `Prediksi: ${labels[context.raw.x]} | ` +
+                            `Jumlah: ${context.raw.v}`
+                    }
+                }
+            },
+
+            scales: {
+                x: {
+                    type: 'linear',
+                    position: 'top',
+                    min: -0.5,
+                    max: labels.length - 0.5,
+                    ticks: {
+                        stepSize: 1,
+                        color: 'white',
+                        font: { size: 11 },
+                        callback: value => labels[value]
+                    },
+                    grid: { display: false },
+                    title: {
+                        display: true,
+                        text: 'Prediksi Sistem',
+                        color: 'white',
+                        font: { size: 14, weight: 'bold' }
+                    }
+                },
+
+                y: {
+                    type: 'linear',
+                    min: -0.5,
+                    max: labels.length - 0.5,
+                    ticks: {
+                        stepSize: 1,
+                        color: 'white',
+                        font: { size: 11 },
+                        callback: value => labels[value]
+                    },
+                    grid: { display: false },
+                    title: {
+                        display: true,
+                        text: 'Data Asli (Ground Truth)',
+                        color: 'white',
+                        font: { size: 14, weight: 'bold' }
+                    }
+                }
+            }
+        },
+
+        // 🔥 Plugin agar angka benar-benar di tengah kotak
+        plugins: [{
+            id: 'centerText',
+            afterDatasetsDraw(chart) {
+                const {ctx} = chart;
+                const meta = chart.getDatasetMeta(0);
+
+                meta.data.forEach((element, index) => {
+                    const data = matrixData[index];
+
+                    ctx.save();
+                    ctx.fillStyle = 'white';
+                    ctx.font = 'bold 16px Segoe UI';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+
+                    // Posisi benar-benar center
+                    ctx.fillText(
+                        data.v,
+                        element.x,
+                        element.y
+                    );
+
+                    ctx.restore();
+                });
+            }
+        }]
+    });
+
+});
+{% endif %}
+</script>
+
+</body>
+</html>

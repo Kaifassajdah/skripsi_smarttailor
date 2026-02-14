@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+{% extends "admin_base.html" %}
+{% block content %}
+
+<h2>Kelola Dataset</h2>
+
+<a href="/admin/dataset/tambah"><button class="btn">➕ Tambah Data Busana</button></a>
+
+{% for d in data %}
+<div class="card">
+<img src="{{ url_for('static', filename=d.path.replace('static/','')) }}" width="120" style="border-radius:5px;"><br>
+Kategori: {{ d.kategori }}<br>
+Bentuk Tubuh: {{ d.tubuh }}<br>
+
+<form action="/admin/dataset/hapus" method="POST">
+    <input type="hidden" name="path" value="{{ d.path }}">
+    <button class="btn" style="background:#c1121f">🗑 Hapus</button>
+</form>
+</div>
+{% endfor %}
+
+{% endblock %}

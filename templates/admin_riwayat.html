@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin - Riwayat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .header {
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .container {
+            padding: 15px;
+            padding-bottom: 80px;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.15);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+
+        .info {
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .images img {
+            width: 60px;
+            height: 80px;
+            object-fit: contain;
+            background: white;
+            border-radius: 8px;
+            padding: 3px;
+        }
+
+        .score {
+            font-size: 10px;
+            text-align: center;
+        }
+
+        .status-box {
+            font-size: 12px;
+            margin-top: 5px;
+            padding: 4px 8px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        .btn-rating {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .btn-rating:active {
+            transform: scale(0.95);
+            background: #218838;
+        }
+
+        .back-btn {
+            position: fixed;
+            bottom: 15px;
+            left: 15px;
+            background: rgba(0,0,0,0.6);
+            padding: 10px 15px;
+            border-radius: 25px;
+            z-index: 1000;
+        }
+
+        .back-btn a {
+            color: white;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .filter-box {
+            margin-bottom: 15px;
+        }
+
+        .filter-box input {
+            padding: 8px;
+            border-radius: 15px;
+            border: none;
+            width: 150px;
+        }
+
+        .filter-box button {
+            padding: 8px 12px;
+            border-radius: 15px;
+            border: none;
+            background: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    🕓 Riwayat Rekomendasi User
+</div>
+
+<div class="container">
+
+    <div class="filter-box">
+        <form method="GET">
+            <input type="text" name="user" placeholder="Filter username">
+            <button type="submit">🔍</button>
+        </form>
+    </div>
+
+    {% for item in data %}
+    <div class="card">
+
+        <div class="info">
+            <b>User:</b> {{ item.username }} <br>
+            <b>Tipe Tubuh:</b> {{ item.tubuh }} <br>
+            <b>History ID:</b> {{ item.id }}
+            
+            <div class="status-box">
+                Status:
+                {% if item.status == "Sudah Dinilai" %}
+                    <span style="color: #00ff00; font-weight: bold;">✔ {{ item.status }}</span>
+                {% else %}
+                    <span style="color: #ff9999; font-weight: bold;">✖ {{ item.status }}</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="images">
+            {% for r in item.results %}
+                <div>
+                    <img src="{{ r.image_path }}">
+                    <div class="score">{{ r.category }}<br>{{ "%.2f"|format(r.score) }}</div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div style="text-align: right;">
+            <a href="/admin/rating/{{ item.id }}" class="btn-rating">
+                ⭐ Berikan Rating Admin/Penjahit
+            </a>
+        </div>
+
+    </div>
+    {% endfor %}
+
+</div>
+
+<div class="back-btn">
+    <a href="/admin">⬅ Dashboard</a>
+</div>
+
+</body>
+</html>

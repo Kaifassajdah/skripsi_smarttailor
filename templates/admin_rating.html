@@ -1,0 +1,250 @@
+{% extends "admin_base.html" %}
+{% block content %}
+
+<style>
+    /* Reset & Base Mobile Optimization */
+    body {
+        background: linear-gradient(135deg, #667eea, #764ba2) !important;
+        color: white !important;
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    /* Sembunyikan Navbar bawaan jika ada di admin_base.html */
+    nav, .navbar, footer {
+        display: none !important;
+    }
+
+    .container {
+        padding: 15px;
+        padding-bottom: 100px;
+        max-width: 100%;
+        margin: 0 auto;
+        box-sizing: border-box;
+    }
+
+    h2 {
+        text-align: center;
+        font-size: 1.2rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin: 20px 0;
+        font-weight: 700;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    /* Card Glassmorphism - Optimal untuk Mobile */
+    .card {
+        background: rgba(255, 255, 255, 0.18);
+        padding: 15px;
+        border-radius: 16px;
+        margin-bottom: 15px;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+    }
+
+    .card h4 {
+        margin: 0 0 12px 0;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        border-bottom: 1px solid rgba(255,255,255,0.2);
+        padding-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #efefef;
+    }
+
+    /* Layout Foto Input */
+    .user-profile {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .user-profile img {
+        width: 70px;
+        height: 90px;
+        object-fit: cover;
+        border-radius: 12px;
+        border: 2px solid rgba(255,255,255,0.5);
+        background: white;
+    }
+
+    .badge-body {
+        background: #4facfe;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        display: inline-block;
+        margin-top: 5px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    /* Grid Rekomendasi 2 Kolom di HP Kecil, 3 Kolom di HP Sedang */
+    .image-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    .image-box {
+        text-align: center;
+    }
+
+    .image-box img {
+        width: 100%;
+        aspect-ratio: 3/4;
+        border-radius: 8px;
+        object-fit: cover;
+        background: white;
+        padding: 2px;
+    }
+
+    .image-box small {
+        display: block;
+        margin-top: 4px;
+        font-size: 0.7rem;
+        opacity: 0.9;
+    }
+
+    /* Form Mobile Friendly */
+    label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: block;
+        margin-bottom: 6px;
+        color: #f0f0f0;
+    }
+
+    select, textarea {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 15px;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.3);
+        background: rgba(255, 255, 255, 0.95);
+        color: #333;
+        font-size: 1rem; /* Mencegah Auto-zoom di iPhone/Android */
+        appearance: none; /* Menghilangkan style default */
+        box-sizing: border-box;
+    }
+
+    textarea {
+        resize: none;
+    }
+
+    /* Tombol Aksi */
+    .btn-save {
+        width: 100%;
+        padding: 15px;
+        background: linear-gradient(to right, #28a745, #218838);
+        color: white;
+        border: none;
+        border-radius: 14px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+    }
+
+    .btn-back-container {
+        position: fixed;
+        bottom: 20px;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        z-index: 999;
+    }
+
+    .btn-back {
+        background: rgba(0, 0, 0, 0.75);
+        color: white;
+        padding: 10px 25px;
+        border-radius: 30px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255,255,255,0.2);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+</style>
+
+<div class="container">
+    <h2>⭐ Evaluasi Admin/Penjahit</h2>
+
+    <div class="card">
+        <h4>📤 Profil Input</h4>
+        <div class="user-profile">
+            {% if history and history.input_image %}
+                <img src="{{ url_for('static', filename=history.input_image.replace('static/','')) }}">
+            {% endif %}
+            <div>
+                <p style="margin: 0; font-size: 0.8rem; opacity: 0.8;">Bentuk Tubuh:</p>
+                <div class="badge-body">
+                    {{ history.tubuh|capitalize if history and history.tubuh else 'N/A' }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>✨ Rekomendasi AI</h4>
+        {% if recommendations %}
+        <div class="image-grid">
+            {% for r in recommendations %}
+            <div class="image-box">
+                <img src="{{ url_for('static', filename=r.image_path.replace('static/','')) }}">
+                <small>S: {{ "%.2f"|format(r.score) }}</small>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h4>📝 Form Penilaian</h4>
+        <form method="POST">
+            <label>Kesesuaian dengan Tubuh</label>
+            <select name="skor_kesesuaian" required>
+                <option value="">-- Pilih --</option>
+                <option value="5">5 (Sangat Sesuai)</option>
+                <option value="4">4 (Sesuai)</option>
+                <option value="3">3 (Cukup)</option>
+                <option value="2">2 (Kurang)</option>
+                <option value="1">1 (Tidak Sesuai)</option>
+            </select>
+
+            <label>Estetika & Kelayakan</label>
+            <select name="skor_estetika" required>
+                <option value="">-- Pilih --</option>
+                <option value="5">5 (Sangat Baik)</option>
+                <option value="4">4 (Baik)</option>
+                <option value="3">3 (Cukup)</option>
+                <option value="2">2 (Buruk)</option>
+                <option value="1">1 (Sangat Buruk)</option>
+            </select>
+
+            <label>Komentar</label>
+            <textarea name="komentar" rows="3" placeholder="Tambahkan catatan..."></textarea>
+
+            <button type="submit" class="btn-save">💾 SIMPAN DATA</button>
+        </form>
+    </div>
+</div>
+
+<div class="btn-back-container">
+    <a href="/admin/riwayat" class="btn-back">
+        ⬅ KEMBALI
+    </a>
+</div>
+
+{% endblock %}

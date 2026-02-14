@@ -1,0 +1,36 @@
+# --- Python & Environment ---
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+pyvenv.cfg
+
+# --- Data Besar (Penyebab GitHub Full) ---
+# Jangan upload ribuan gambar dataset ke GitHub
+dataset/
+uploads/
+features/*.npy
+
+# --- Model AI (File .h5 biasanya sangat besar >100MB) ---
+model/resnet_model.h5
+*.h5
+*.pkl
+
+# --- Database & Backup ---
+# Sebaiknya database lokal tidak diupload agar tidak bentrok
+database.db
+backup/
+backup_db/
+*.db
+
+# --- Folder Temp & Log ---
+.gradle/
+build/
+.idea/
+.vscode/
+*.log
+
+# --- OS Trash ---
+.DS_Store
+Thumbs.db
